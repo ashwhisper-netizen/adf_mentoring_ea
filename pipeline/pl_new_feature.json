@@ -1,0 +1,17 @@
+{
+	"name": "pl_new_feature",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_wait3",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"annotations": []
+	}
+}
