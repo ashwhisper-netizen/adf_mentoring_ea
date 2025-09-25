@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "mentoring-adf-ea"
+		},
+		"ls_azurementoringauea_connectionString": {
+			"value": ""
+		},
+		"ls_adf_azurementoringdatalakeea_properties_typeProperties_url": {
+			"value": "https://azurementoringdatalakeea.dfs.core.windows.net/"
+		},
+		"ls_adf_azurementoringstorageea_properties_typeProperties_sasUri_secretName": {
+			"value": "akv-azurementoringstorageea"
+		},
+		"ls_adf_bs_online_properties_typeProperties_sasUri_secretName": {
+			"value": "akv-bs-online"
+		},
+		"ls_adf_db_datamart_properties_typeProperties_connectionString_secretName": {
+			"value": "akv-azuredb-datamart-connstr"
+		},
+		"ls_adf_db_movies_properties_typeProperties_server": {
+			"value": "azure-mentoring-ea.database.windows.net"
+		},
+		"ls_adf_db_movies_properties_typeProperties_database": {
+			"value": "movies"
+		},
+		"ls_adf_db_movies_properties_typeProperties_userName": {
+			"value": "sa_login"
+		},
+		"ls_adf_localdb_properties_typeProperties_connectionString_secretName": {
+			"value": "akv-localdbconnstr"
+		},
+		"ls_mentoring_adf_akv_ea_properties_typeProperties_baseUrl": {
+			"value": "https://mentoring-key-vault-ea.vault.azure.net/"
+		}
+	}
+}

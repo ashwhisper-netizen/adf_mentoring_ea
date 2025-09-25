@@ -1,0 +1,6 @@
+{
+	"glob_param_akv_logapp_uri": {
+		"type": "string",
+		"value": "https://mentoring-key-vault-ea.vault.azure.net/secrets/akv-logic-app-url/0e8d816857a44564ab6359735d620439?api-version=7.5"
+	}
+}
