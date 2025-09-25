@@ -1,0 +1,23 @@
+{
+	"name": "pl_failed_run",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_Fail",
+				"type": "Fail",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Error message",
+					"errorCode": "Error code"
+				}
+			}
+		],
+		"folder": {
+			"name": "module#10"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-22T19:15:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

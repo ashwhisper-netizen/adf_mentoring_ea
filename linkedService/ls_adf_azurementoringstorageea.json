@@ -1,0 +1,19 @@
+{
+	"name": "ls_adf_azurementoringstorageea",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Linked Service to the Azure Blob Storage azurementoringstorageea",
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_mentoring_adf_akv_ea",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "akv-azurementoringstorageea"
+			}
+		}
+	}
+}

@@ -1,0 +1,96 @@
+{
+	"name": "pl_copy_to_db",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_exec_copy_to_db_stg_credits",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_copy_to_db_stg_credits",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "act_gen_exec_copy_to_db_stg_metadata",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_copy_to_db_stg_metadata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "act_gen_exec_copy_to_db_stg_ratings",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_copy_to_db_stg_ratings",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "act_gen_exec_etl_to_db_dbo",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "act_gen_exec_copy_to_db_stg_credits",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_exec_copy_to_db_stg_metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_exec_copy_to_db_stg_ratings",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_etl_to_db_dbo",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "module#5"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-08-29T13:31:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

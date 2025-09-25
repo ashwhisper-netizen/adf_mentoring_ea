@@ -1,0 +1,246 @@
+{
+	"name": "pl_etl_to_db_dbo",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_sp_Genre",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateGenre]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_Cast",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateCast]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_Company",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateCompany]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_MovieStatus",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateMovieStatus]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_Movies",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_sp_MovieStatus",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateMovies]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_MoviesGenreMap",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_sp_Genre",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_sp_Movies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateMoviesGenreMap]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_MoviesCompanyMap",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_sp_Company",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_sp_Movies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateMoviesCompanyMap]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_MoviesCastMap",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_sp_Cast",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_sp_Movies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateMoviesCastMap]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_sp_Ratings",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_sp_Movies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulatetRatings]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "module#5"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-08-29T13:31:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

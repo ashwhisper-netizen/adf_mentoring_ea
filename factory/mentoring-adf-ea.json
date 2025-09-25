@@ -1,0 +1,20 @@
+{
+	"name": "mentoring-adf-ea",
+	"properties": {
+		"globalParameters": {
+			"glob_param_akv_logapp_uri": {
+				"type": "string",
+				"value": "https://mentoring-key-vault-ea.vault.azure.net/secrets/akv-logic-app-url/0e8d816857a44564ab6359735d620439?api-version=7.5"
+			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a417718e-49b8-4500-9433-2ff871e5fa53",
+		"tenantId": "b41b72d0-4e9f-4c26-8a69-f949f367c91d"
+	}
+}

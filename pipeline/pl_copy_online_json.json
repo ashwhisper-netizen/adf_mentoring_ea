@@ -1,0 +1,174 @@
+{
+	"name": "pl_copy_online_json",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_LookupWatermark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT TableName, WatermarkValue\n  FROM dbo.watermarktable\n  WHERE TableName = 'online_json'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_db_watermark",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "act_mt_CopyOnline",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "act_gen_LookupWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_set_varNewWatermarkValue",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"modifiedDatetimeStart": {
+								"value": "@formatDateTime(activity('act_gen_LookupWatermark').output.firstRow.WatermarkValue, 'MM/dd/yyyy hh:mm:ss tt')",
+								"type": "Expression"
+							},
+							"modifiedDatetimeEnd": {
+								"value": "@variables('varNewWatermarkValue')",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.json",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_bs_online",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_dls_online",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "act_gen_sp_write_watermark",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_mt_CopyOnline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[sp_write_watermark]",
+					"storedProcedureParameters": {
+						"LastModifiedtime": {
+							"value": {
+								"value": "@variables('varNewWatermarkValue')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"TableName": {
+							"value": {
+								"value": "@activity('act_gen_LookupWatermark').output.firstRow.TableName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_set_varNewWatermarkValue",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varNewWatermarkValue",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"varNewWatermarkValue": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "module#7"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-08T11:35:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

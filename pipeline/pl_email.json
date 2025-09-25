@@ -1,0 +1,74 @@
+{
+	"name": "pl_email",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_web_get_uri_val",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"disableCertValidation": false,
+					"url": {
+						"value": "@pipeline().globalParameters.glob_param_akv_logapp_uri",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "act_gen_web_post_email",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "act_gen_web_get_uri_val",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@activity('act_gen_web_get_uri_val').output.value",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n\t\"subject\":\"Pipeline @{pipeline().Pipeline} finished. Status: \",\n\t\"message\":\"<hr/>\n<h2 style='color:green'>Pipeline run finished successfully.</h2>\n<hr/>\nData Factory Name: <b>@{pipeline().DataFactory}</b><br/>\nPipeline Name: <b>@{pipeline().Pipeline}</b><br/>\nPipeline Run Id: <b>@{pipeline().RunId}</b><br/>\n<hr/>\n<p style='color:gray'>This email was generated automatically. Please do not respond to it.</p>\"\n}",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"varLgicAppURL": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "module#10"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-24T16:05:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,161 @@
+{
+	"name": "pl_copy_to_db_stg_online_purchase",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_copy_to_db_stg_online_purchase",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"additionalColumns": [
+							{
+								"name": "fname",
+								"value": "$$FILENAME"
+							},
+							{
+								"name": "pipelineId",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": false,
+							"wildcardFolderPath": "online",
+							"wildcardFileName": "*.json",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table stg.online_purchase",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['serviceName']"
+								},
+								"sink": {
+									"name": "online_service_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['serviceCode']"
+								},
+								"sink": {
+									"name": "online_service_code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['movieId']"
+								},
+								"sink": {
+									"name": "movie_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['userId']"
+								},
+								"sink": {
+									"name": "user_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['price']"
+								},
+								"sink": {
+									"name": "price",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['transaction']['id']"
+								},
+								"sink": {
+									"name": "transaction_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['transaction']['datetime']"
+								},
+								"sink": {
+									"name": "transaction_date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['fname']"
+								},
+								"sink": {
+									"name": "source_filename",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pipelineId']"
+								},
+								"sink": {
+									"name": "pipelineId",
+									"type": "String"
+								}
+							}
+						],
+						"mapComplexValuesToString": true
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_dls_online",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_db_stg_online_purchase",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "module#7"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-08T12:08:53Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

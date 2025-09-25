@@ -1,0 +1,256 @@
+{
+	"name": "df_load_datamart_Facts",
+	"properties": {
+		"folder": {
+			"name": "module#8"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_db_movies_tOnlinePurchase",
+						"type": "DatasetReference"
+					},
+					"name": "srcOnlinePurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_db_movies_tOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "sourceOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_db_movies_tMovies",
+						"type": "DatasetReference"
+					},
+					"name": "sourceMovies"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_db_datamart_DimOnlineService",
+						"type": "DatasetReference"
+					},
+					"name": "sourceDimOnlineService"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_db_datamart_DimMovie",
+						"type": "DatasetReference"
+					},
+					"name": "sourceDimMovie"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_db_datamart_FactOnlinePurchase",
+						"type": "DatasetReference"
+					},
+					"name": "sinkFactOnlinePurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_db_datamart_FactOnlinePurchase_MonthlySnapshot",
+						"type": "DatasetReference"
+					},
+					"name": "sinkFactOnlinePurchaseMonthlySnapshot"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinOnlineService"
+				},
+				{
+					"name": "joinMovies"
+				},
+				{
+					"name": "selectMovies"
+				},
+				{
+					"name": "joinDimOnlineService"
+				},
+				{
+					"name": "joinDimMovie"
+				},
+				{
+					"name": "selectDim"
+				},
+				{
+					"name": "yyyyMMdd"
+				},
+				{
+					"name": "yyyyMM"
+				},
+				{
+					"name": "agg"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Id as integer,",
+				"          ServiceId as integer,",
+				"          MovieId as integer,",
+				"          UserId as integer,",
+				"          Price as decimal(4,1),",
+				"          TransactionId as string,",
+				"          TransactionDate as timestamp,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp,",
+				"          SrcFileName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_COMMITTED',",
+				"     format: 'table') ~> srcOnlinePurchase",
+				"source(output(",
+				"          ServiceId as integer,",
+				"          ServiceCode as string,",
+				"          ServiceName as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_COMMITTED',",
+				"     format: 'table') ~> sourceOnlineService",
+				"source(output(",
+				"          MovieId as integer,",
+				"          MovieIdNK as integer,",
+				"          Budget as integer,",
+				"          HomepagePath as string,",
+				"          Title as string,",
+				"          OriginalTitle as string,",
+				"          ReleaseDate as date,",
+				"          Revenue as long,",
+				"          Runtime as integer,",
+				"          MovieStatusId as integer,",
+				"          AvgVote as decimal(3,1),",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp,",
+				"          SrcFileName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_COMMITTED',",
+				"     format: 'table') ~> sourceMovies",
+				"source(output(",
+				"          ServiceKey as integer,",
+				"          ServiceCode as string,",
+				"          ServiceName as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_COMMITTED',",
+				"     format: 'table') ~> sourceDimOnlineService",
+				"source(output(",
+				"          MovieKey as integer,",
+				"          MovieIdNK as integer,",
+				"          Title as string,",
+				"          ReleaseDate as date,",
+				"          Runtime as integer,",
+				"          MovieStatus as string,",
+				"          CreatedDate as timestamp,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_COMMITTED',",
+				"     format: 'table') ~> sourceDimMovie",
+				"srcOnlinePurchase, sourceOnlineService join(srcOnlinePurchase@ServiceId == sourceOnlineService@ServiceId,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinOnlineService",
+				"joinOnlineService, sourceMovies join(srcOnlinePurchase@MovieId == sourceMovies@MovieId,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinMovies",
+				"joinMovies select(mapColumn(",
+				"          TransactionDate,",
+				"          TransactionId,",
+				"          Price,",
+				"          ServiceCode,",
+				"          MovieIdNK",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> selectMovies",
+				"selectMovies, sourceDimOnlineService join(selectMovies@ServiceCode == sourceDimOnlineService@ServiceCode,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDimOnlineService",
+				"joinDimOnlineService, sourceDimMovie join(selectMovies@MovieIdNK == sourceDimMovie@MovieIdNK,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDimMovie",
+				"joinDimMovie select(mapColumn(",
+				"          Price,",
+				"          TransactionId,",
+				"          ServiceKey,",
+				"          MovieKey,",
+				"          Title,",
+				"          TransactionDate",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> selectDim",
+				"selectDim derive(TransactionDate = toInteger( replace( toString(TransactionDate,'yyyy-MM-dd'), '-','') )) ~> yyyyMMdd",
+				"selectDim derive(TransactionDate = toInteger(substring(replace(toString(TransactionDate,'yyyy-MM-dd'), '-',''), 1, 6))) ~> yyyyMM",
+				"yyyyMM aggregate(groupBy(TransactionDate,",
+				"          ServiceKey),",
+				"     Price = sum(Price),",
+				"          TransactionId = count(TransactionId)) ~> agg",
+				"yyyyMMdd sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          DateKey as integer,",
+				"          OnlineServiceKey as integer,",
+				"          MovieKey as integer,",
+				"          Price as decimal(4,1),",
+				"          TransactionId as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          DateKey = TransactionDate,",
+				"          OnlineServiceKey = ServiceKey,",
+				"          MovieKey,",
+				"          Price,",
+				"          TransactionId",
+				"     )) ~> sinkFactOnlinePurchase",
+				"agg sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          MonthKey as integer,",
+				"          OnlineServiceKey as integer,",
+				"          PurchaseAmount as decimal(10,1),",
+				"          PurchaseQuantity as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          MonthKey = TransactionDate,",
+				"          OnlineServiceKey = ServiceKey,",
+				"          PurchaseAmount = Price,",
+				"          PurchaseQuantity = TransactionId",
+				"     )) ~> sinkFactOnlinePurchaseMonthlySnapshot"
+			]
+		}
+	}
+}

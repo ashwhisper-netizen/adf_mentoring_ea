@@ -1,0 +1,16 @@
+{
+	"name": "ds_db_movies",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adf_db_movies",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "module#2"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

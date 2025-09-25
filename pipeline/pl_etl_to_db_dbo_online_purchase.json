@@ -1,0 +1,60 @@
+{
+	"name": "pl_etl_to_db_dbo_online_purchase",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_spOnlineService",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateOnlineService]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_spOnlinePurchase",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_gen_spOnlineService",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[spPopulateOnlinePurchase]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "module#7"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-08T12:31:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

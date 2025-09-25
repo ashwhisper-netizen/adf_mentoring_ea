@@ -1,0 +1,11 @@
+{
+	"name": "ls_adf_azurementoringdatalakeea",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://azurementoringdatalakeea.dfs.core.windows.net/"
+		}
+	}
+}

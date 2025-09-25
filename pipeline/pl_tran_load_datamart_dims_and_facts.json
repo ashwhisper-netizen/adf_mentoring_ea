@@ -1,0 +1,68 @@
+{
+	"name": "pl_tran_load_datamart_dims_and_facts",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_mt_df_LoadDatamartDims",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_load_datamart_Dims",
+						"type": "DataFlowReference"
+					},
+					"integrationRuntime": {
+						"referenceName": "Azure-IR-M8",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "act_mt_df_LoadDatamartFacts",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "act_mt_df_LoadDatamartDims",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_load_datamart_Facts",
+						"type": "DataFlowReference"
+					},
+					"integrationRuntime": {
+						"referenceName": "Azure-IR-M8",
+						"type": "IntegrationRuntimeReference"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"folder": {
+			"name": "module#8"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-15T13:25:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

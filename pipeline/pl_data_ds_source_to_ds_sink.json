@@ -1,0 +1,253 @@
+{
+	"name": "pl_data_ds_source_to_ds_sink",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_GetSourceMetadata",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "act_gen_varStartTime",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_src_metadata",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "act_ic_ForEachSourceFile",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "act_gen_GetSourceMetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('ACT_GEN_GetSourceMetadata').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "act_mt_Copy_File",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_src_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"pSrcFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_snk_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"pDestFileName": {
+											"value": "@concat(replace(item().name,'.csv',''),'_',formatDateTime(convertTimeZone(pipeline().TriggerTime,'UTC','Central European Standard Time'),'yyyyMMddHHmmss'),'.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "act_gen_varStartTime",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varPLStartTime",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "act_gen_varEndTime",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "act_ic_ForEachSourceFile",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "varPLEndTime",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ACT_MT_Copy_CreateExecLogFile",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "act_gen_varEndTime",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select \n'@{pipeline().RunId}' as pipeline_run_id,\n'@{pipeline().Pipeline}' as pipeline_name,\n'@{formatDateTime(convertTimeZone(pipeline().TriggerTime,'UTC','Central European Standard Time'),'yyyyMMdd_HH:mm:ss')}' as pipeline_trigger_time,\n'@{formatDateTime(convertTimeZone(variables('varPLStartTime'),'UTC','Central European Standard Time'),'yyyyMMdd_HH:mm:ss')}' as execution_start_time,\n'@{formatDateTime(convertTimeZone(variables('varPLEndTime'),'UTC','Central European Standard Time'),'yyyyMMdd_HH:mm:ss')}' as execution_end_time",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_db_movies",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_log",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"variables": {
+			"varPLStartTime": {
+				"type": "String"
+			},
+			"varPLEndTime": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "module#2"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-08-25T14:39:58Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

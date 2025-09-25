@@ -1,0 +1,22 @@
+{
+	"name": "ls_adf_localdb",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_mentoring_adf_akv_ea",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "akv-localdbconnstr"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AzureMentoringSHIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

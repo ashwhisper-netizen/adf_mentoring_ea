@@ -1,0 +1,36 @@
+{
+	"name": "ds_db_movies_tMovieStatus",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adf_db_movies",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "module#8"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "MovieStatusId",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "MovieStatusName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tMovieStatus"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

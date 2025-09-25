@@ -1,0 +1,18 @@
+{
+	"name": "ls_adf_db_datamart",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_mentoring_adf_akv_ea",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "akv-azuredb-datamart-connstr"
+			}
+		}
+	}
+}

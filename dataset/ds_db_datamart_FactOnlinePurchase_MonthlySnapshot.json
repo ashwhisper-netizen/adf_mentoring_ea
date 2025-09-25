@@ -1,0 +1,42 @@
+{
+	"name": "ds_db_datamart_FactOnlinePurchase_MonthlySnapshot",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adf_db_datamart",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "module#8"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "MonthKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OnlineServiceKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PurchaseAmount",
+				"type": "decimal",
+				"precision": 10,
+				"scale": 1
+			},
+			{
+				"name": "PurchaseQuantity",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "FactOnlinePurchase_MonthlySnapshot"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

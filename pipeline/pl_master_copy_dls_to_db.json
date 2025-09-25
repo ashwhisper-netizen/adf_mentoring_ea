@@ -1,0 +1,75 @@
+{
+	"name": "pl_master_copy_dls_to_db",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_exec_copy_data_to_db",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "act_gen_exec_copy_files_to_dls",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_copy_to_db",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "act_gen_exec_copy_files_to_dls",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_data_ds_source_to_ds_sink_v2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "act_gen_exec_move_files_to_archive",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "act_gen_exec_copy_data_to_db",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_move_files_to_archive",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "module#5"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-08-29T13:31:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

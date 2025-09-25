@@ -1,0 +1,195 @@
+{
+	"name": "pl_copy_inc_CinemaTickets",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_mt_copy_inc_to_db_stg_tickets",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "act_gen_LookupOldWaterMark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "act_gen_LookupNewWaterMark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "select \nCinemaCode as cinema_code,\nCinemaName as cinema_name,\nMovieId as movie_id,\nTicketCount as ticket_count,\nTicketPrice as ticket_price,\nTransactionId as transaction_id,\nTransactionDt as transaction_date\n from dbo.Tickets where TransactionDt > '@{activity('act_gen_LookupOldWaterMark').output.firstRow.WatermarkValue}' and TransactionDt <= '@{activity('act_gen_LookupNewWaterMark').output.firstRow.NewWatermarkValue}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table stg.cinema_tickets",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_localdb_tickets",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_db_stg_tickets",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "act_gen_LookupOldWaterMark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT TableName\n      ,WatermarkValue\n  FROM dbo.watermarktable\n  WHERE TableName = 'cinema_tickets'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_db_watermark",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "act_gen_spWriteWatermark",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "act_mt_copy_inc_to_db_stg_tickets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[sp_write_watermark]",
+					"storedProcedureParameters": {
+						"LastModifiedtime": {
+							"value": {
+								"value": "@formatDateTime(activity('act_gen_LookupNewWaterMark').output.firstRow.NewWatermarkValue, 'yyyy-MM-ddTHH:mm:ss')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"TableName": {
+							"value": {
+								"value": "@activity('act_gen_LookupOldWaterMark').output.firstRow.TableName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_adf_db_movies",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "act_gen_LookupNewWaterMark",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT MAX (TransactionDt) AS NewWatermarkValue FROM dbo.Tickets",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_localdb_tickets",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "act_gen_exec_etl",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "act_gen_spWriteWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_etl_cinema_and_tickets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "module#6"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-09-05T07:21:52Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,26 @@
+{
+	"name": "ds_ratings_sink",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adf_azurementoringdatalakeea",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "module#4"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "ratings-au"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "",
+			"firstRowAsHeader": true,
+			"quoteChar": ""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

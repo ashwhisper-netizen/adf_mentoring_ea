@@ -1,0 +1,22 @@
+{
+	"name": "ds_bs_online",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adf_bs_online",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "module#7"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "online"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
