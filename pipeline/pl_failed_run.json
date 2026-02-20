@@ -8,8 +8,8 @@
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
-					"message": "message",
-					"errorCode": "error"
+					"message": "Error message",
+					"errorCode": "Error code"
 				}
 			}
 		],
