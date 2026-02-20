@@ -1,0 +1,21 @@
+{
+	"name": "pl_failed_run",
+	"properties": {
+		"activities": [
+			{
+				"name": "act_gen_Fail",
+				"type": "Fail",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "message",
+					"errorCode": "error"
+				}
+			}
+		],
+		"folder": {
+			"name": "module#10"
+		},
+		"annotations": []
+	}
+}
